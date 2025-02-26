@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     gray: "#787c7e",
     yellow: "#c9b458",
     green: "#6aaa64",
-    white: "#ffffff"  // default color
+    white: "#ffffff"
   };
 
   function createGrid(data) {
@@ -20,37 +20,29 @@ document.addEventListener("DOMContentLoaded", () => {
       for (let j = 0; j < 5; j++) {
         const cell = document.createElement("div");
         cell.className = "wordle-cell";
-
-        // Set cell background color based on the color state
         const cellColor = colors[i][j] || "white";
         cell.style.backgroundColor = COLORS[cellColor];
 
         const input = document.createElement("input");
         input.type = "text";
         input.className = "wordle-input";
-        input.value = grid[i][j] || "";  // Ensure empty string if no value
+        input.value = grid[i][j] || "";
         input.maxLength = 1;
         input.pattern = "[A-Za-z]";
         input.setAttribute("data-row", i);
         input.setAttribute("data-col", j);
 
-        // Set input background to match cell
         input.style.backgroundColor = COLORS[cellColor];
-
-        // Set text color based on background
         input.style.color = cellColor === "white" ? "black" : "white";
 
-        // Disable input if not in active row
         if (i !== activeRow) {
           input.disabled = true;
           input.style.cursor = "default";
         }
 
-        // Color indicator dot
         const colorDot = document.createElement("div");
         colorDot.className = "color-indicator";
 
-        // Handle letter input
         input.addEventListener("input", (e) => {
           if (i === activeRow) {
             const value = e.target.value.replace(/[^A-Za-z]/g, "").toUpperCase();
@@ -62,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-        // Handle color cycling (only for active row)
         colorDot.addEventListener("click", (e) => {
           if (i === activeRow) {
             const row = parseInt(input.getAttribute("data-row"));
@@ -70,7 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const currentColor = colors[row][col] || "gray";
             const nextColor = getNextColor(currentColor);
 
-            // Update colors
             colors[row][col] = nextColor;
             cell.style.backgroundColor = COLORS[nextColor];
             input.style.backgroundColor = COLORS[nextColor];
