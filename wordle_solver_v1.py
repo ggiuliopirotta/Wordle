@@ -1,4 +1,5 @@
 from collections import Counter, defaultdict
+from logging import raiseExceptions
 from math import log2
 import os
 
@@ -105,18 +106,19 @@ class WordleSolver():
         return letters_freq, pos_letters_freq
 
 
-    def get_top_words_prob(self, letters_freq, pos_letters_freq, k=10):
+    def get_top_words_prob(self, letters_freq, pos_letters_freq, allowed=False, k=10):
         '''
         Get the top k words based on their letters distribution.
 
         :param letters_freq: overall freq of each letter
         :param pos_letters_freq: freq of each letter in each position
+        :param possible: whether to consider just the possible candidates or all allowed words
         :param k: number of words to return
         :return: top k words
         '''
 
         top_words = {}
-        for word in self.allowed_candidates:
+        for word in (self.allowed_candidates if allowed else self.candidates):
             score = sum(
                 [letters_freq.get(letter, 0) + pos_letters_freq[i].get(letter, 0) for i, letter in enumerate(word)]
             )
@@ -143,7 +145,7 @@ class WordleSolver():
 
         prob = [count / len(self.candidates) for count in pattern_counts.values()]
         h_guess = -sum([p * log2(p) for p in prob])
-        return h_guess
+        return abs(h_guess)
 
 
     def guess(self):
@@ -155,11 +157,12 @@ class WordleSolver():
         :return: the guess and its h(x)
         '''
 
-        if len(self.tried) <= 2:
+        if len(self.tried) < 1:
             letters_freq, pos_letters_freq = self.compute_letters_freq()
             guesses = self.get_top_words_prob(
                 letters_freq=letters_freq,
                 pos_letters_freq=pos_letters_freq,
+                allowed=True,
                 k=10
             )
         else:
@@ -182,6 +185,7 @@ class WordleSolver():
         else:
             self.update_candidates(result=self.feedbacks[-1])
             guess, h = self.guess()
-            assert guess, "No candidates left"
+            if not guess:
+                raise ValueError("No candidates left")
 
         return guess, h

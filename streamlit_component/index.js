@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function createGrid(data) {
     container.innerHTML = "";
     const grid = data.grid || Array(6).fill().map(() => Array(5).fill(""));
-    const colors = data.colors || Array(6).fill().map(() => Array(5).fill("gray"));
+    const colors = data.colors || Array(6).fill().map(() => Array(5).fill("white"));
     const activeRow = data.activeRow;
 
     for (let i = 0; i < 6; i++) {
@@ -50,7 +50,19 @@ document.addEventListener("DOMContentLoaded", () => {
             const row = parseInt(e.target.getAttribute("data-row"));
             const col = parseInt(e.target.getAttribute("data-col"));
 
-            updateValue(row, col, value, colors[row][col] || "white");
+            const currentColor = colors[row][col] || "white";
+            let newColor = currentColor;
+            if (currentColor === "white" && value !== "") {
+              newColor = "gray";
+            } else if (value === "") {
+              newColor = "white";
+            }
+
+            colors[row][col] = newColor;
+            cell.style.backgroundColor = COLORS[newColor];
+            input.style.backgroundColor = COLORS[newColor];
+            input.style.color = newColor === "white" ? "black" : "white";
+            updateValue(row, col, value, newColor);
           }
         });
 
@@ -58,14 +70,19 @@ document.addEventListener("DOMContentLoaded", () => {
           if (i === activeRow) {
             const row = parseInt(input.getAttribute("data-row"));
             const col = parseInt(input.getAttribute("data-col"));
-            const currentColor = colors[row][col] || "gray";
-            const nextColor = getNextColor(currentColor);
+            const currentColor = colors[row][col] || "white";
+
+            let nextColor;
+            if (currentColor === "white") {
+              nextColor = "gray";
+            } else {
+              nextColor = getNextColor(currentColor);
+            }
 
             colors[row][col] = nextColor;
             cell.style.backgroundColor = COLORS[nextColor];
             input.style.backgroundColor = COLORS[nextColor];
             input.style.color = nextColor === "white" ? "black" : "white";
-
             updateValue(row, col, input.value, nextColor);
           }
         });
@@ -79,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getNextColor(currentColor) {
-    const colorOrder = ["gray", "yellow", "green", "white"];
+    const colorOrder = ["gray", "yellow", "green"];
     const currentIndex = colorOrder.indexOf(currentColor);
     return colorOrder[(currentIndex + 1) % colorOrder.length];
   }
