@@ -10,5 +10,7 @@ This app hosts an entropy-based wordle solver to crack the famous online [game](
 - [x] Understand whether it is better to use a possible or allowed word
 - [x] Fix entropy calculation and show actual gain
 - [ ] Attempt using a dummy guess
+- [x] Add a shortcut to use the guess from the solver
+- [ ] Color cells automatically
 - [x] Handle errors
 - [x] Endgame

@@ -90,7 +90,7 @@ with cols[1]:
 
     # Show all remaining candidates if there are just a few possible left
     if len(candidates) in range(2, 6):
-        with st.expander("Show remaining candidates"):
+        with st.expander("Remaining candidates"):
             st.write(" - ".join(candidates).upper())
 
     # Show hints table
@@ -102,6 +102,11 @@ with cols[1]:
         form = {col: "{:.2f}" for col in floating_cols}
         table = st.session_state.hints.style.format(form).set_table_styles([sel1, sel2]).hide(axis=0).to_html()
         st.write(f'{table}', unsafe_allow_html=True)
+
+    if st.button("Use guess"):
+        st.session_state.guesses_grid[n_guesses] = list(st.session_state.hints.loc[n_guesses]["Guess"])
+        st.session_state.results_grid[n_guesses] = ["gray"] * 5
+        st.rerun()
 
     # Show how the actual guesses differ from the expectation
     delta = st.session_state.delta
@@ -120,7 +125,7 @@ if updated_grid:
     st.session_state.results_grid[row][col] = updated_grid["color"]
     st.rerun()
 
-with ((cols[0])):
+with cols[0]:
     # Submit the guess and get the next one from the solver based on the previous
     if st.button("Submit guess"):
         guess_list = st.session_state.guesses_grid[n_guesses]
@@ -158,20 +163,21 @@ with ((cols[0])):
         except Exception as e:
             print_alert(message=str(e))
 
-    # Restart the game cleaning the state
-    if st.button("Restart"):
-        st.session_state.wordle_solver.restart_game()
-        _guess, _h                      = st.session_state.wordle_solver.first_guess
-        st.session_state.hints          = pd.DataFrame(columns=["Guess", "E[H(x)] gain", "E[H(x)] left", "Candidates"])
-        st.session_state.hints.loc[0]   = [
-            _guess.upper(),
-            _h,
-            st.session_state.wordle_solver.max_h-_h,
-            len(st.session_state.wordle_solver.candidates)
-        ]
-        st.session_state.guesses_grid   = [["" for _ in range(5)] for _ in range(6)]
-        st.session_state.results_grid   = [["" for _ in range(5)] for _ in range(6)]
-        st.session_state.guesses        = []
-        st.session_state.results        = []
-        st.session_state.delta          = {}
-        st.rerun()
+# Restart the game cleaning the state
+if st.button("Restart"):
+    st.session_state.wordle_solver.restart_game()
+    _guess, _h                      = st.session_state.wordle_solver.first_guess
+    st.session_state.hints          = pd.DataFrame(columns=["Guess", "E[H(x)] gain", "E[H(x)] left", "Candidates"])
+    st.session_state.hints.loc[0]   = [
+        _guess.upper(),
+        _h,
+        st.session_state.wordle_solver.max_h-_h,
+        len(st.session_state.wordle_solver.candidates)
+    ]
+    st.session_state.guesses_grid   = [["" for _ in range(5)] for _ in range(6)]
+    st.session_state.results_grid   = [["" for _ in range(5)] for _ in range(6)]
+    st.session_state.guesses        = []
+    st.session_state.results        = []
+    st.session_state.delta          = {}
+    st.rerun()
+
