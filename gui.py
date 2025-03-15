@@ -72,6 +72,23 @@ def print_alert(message: str, level: str="error") -> None:
             st.error(message)
 
 
+### -------------------------------------------------- ###
+### --- MARKDOWN --- ###
+
+
+st.markdown(
+    """
+    <h1 style='text-align: center;'>Wordle Solver</h1>
+    
+    This is an entropy-based solver for the [Wordle](https://www.nytimes.com/games/wordle).
+    
+    On the left, there is an interactive grid to input the guesses and the feedbacks received from the game. \
+    Once a guess is submitted, the solver will provide the next one.
+    
+    Note: Attempts needed = 3.6 (avg)
+    """,
+    unsafe_allow_html=True
+)
 
 ### -------------------------------------------------- ###
 ### --- PAGE CONTENT --- ###
@@ -103,7 +120,10 @@ with cols[1]:
         table = st.session_state.hints.style.format(form).set_table_styles([sel1, sel2]).hide(axis=0).to_html()
         st.write(f'{table}', unsafe_allow_html=True)
 
-    if st.button("Use guess"):
+    if st.button(
+            label="Use guess",
+            help="Input the suggested guess in the current table row"
+    ):
         st.session_state.guesses_grid[n_guesses] = list(st.session_state.hints.loc[n_guesses]["Guess"])
         st.session_state.results_grid[n_guesses] = ["gray"] * 5
         st.rerun()
@@ -115,7 +135,15 @@ with cols[1]:
             label=f"Actual H(x) left after guess",
             value=round(delta["value"], 2),
             delta=round(delta["delta"], 2) if abs(delta["delta"]) > 1e-5 else None,
-            delta_color="inverse"
+            delta_color="inverse",
+            help="""
+                This is the actual entropy left after the last guess and \\
+                the little number below indicates the difference from the expected value. \\
+                It can be either
+                - green: more entropy gained then expected, you were lucky!
+                - red: better luck next time...
+                
+                """
         )
 
 # Show the custom component
@@ -127,7 +155,10 @@ if updated_grid:
 
 with cols[0]:
     # Submit the guess and get the next one from the solver based on the previous
-    if st.button("Submit guess"):
+    if st.button(
+            label="Submit guess",
+            help="Send the guess to the solver to compute the next one"
+    ):
         guess_list = st.session_state.guesses_grid[n_guesses]
         color_list = st.session_state.results_grid[n_guesses]
         try:
